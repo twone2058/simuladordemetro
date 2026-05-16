@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metro Medellín — Simulador de Rutas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { background: #f5f5f5; color: #1a1a1a; }
+
+    /* NAV */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: white; border-bottom: 1px solid #e5e5e5; }
+    .logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; }
+    .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #00A651; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-link { font-size: 13px; color: #888; text-decoration: none; cursor: pointer; }
+    .nav-link.active { color: #1a1a1a; font-weight: 500; }
+
+    /* HERO */
+    .hero { text-align: center; padding: 48px 24px 32px; }
+    .hero h1 { font-size: 28px; font-weight: 500; margin-bottom: 8px; }
+    .hero p { font-size: 14px; color: #666; line-height: 1.6; }
+    .badges { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid #e5e5e5; color: #666; background: white; }
+
+    /* MAIN LAYOUT */
+    .main { max-width: 860px; margin: 0 auto; padding: 0 24px 40px; }
+
+    /* CARD */
+    .card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .card-title { font-size: 11px; font-weight: 500; color: #999; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 16px; }
+
+    /* FORM */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: #666; }
+    .form-group select { padding: 9px 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; background: #fafafa; color: #1a1a1a; cursor: pointer; }
+    .form-group select:focus { outline: none; border-color: #00A651; }
+
+    /* TOGGLES */
+    .toggle-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .toggle { flex: 1; padding: 9px 8px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 12px; text-align: center; cursor: pointer; color: #666; background: #fafafa; transition: all .15s; }
+    .toggle:hover { border-color: #00A651; color: #00A651; }
+    .toggle.selected { border-color: #00A651; color: #00A651; background: #f0faf4; font-weight: 500; }
+
+    /* BUTTON */
+    .btn-primary { width: 100%; padding: 11px; background: #00A651; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background .15s; }
+    .btn-primary:hover { background: #008f44; }
+
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .stat { background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 14px; text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 500; color: #1a1a1a; }
+    .stat-label { font-size: 11px; color: #999; margin-top: 2px; }
+
+    /* LINEAS */
+    .lineas-card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .lineas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .linea-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #e5e5e5; border-radius: 8px; }
+    .linea-color { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .linea-info { font-size: 12px; }
+    .linea-name { font-weight: 500; color: #1a1a1a; }
+    .linea-desc { color: #999; font-size: 11px; }
+
+    /* ALGORITMOS */
+    .algo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .algo-item { padding: 14px; border: 1px solid #e5e5e5; border-radius: 8px; background: #fafafa; }
+    .algo-name { font-size: 13px; font-weight: 500; color: #1a1a1a; margin-bottom: 4px; }
+    .algo-desc { font-size: 11px; color: #666; line-height: 1.5; }
+    .algo-tag { display: inline-block; margin-top: 6px; font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #f0faf4; color: #00A651; border: 1px solid #c3e8d0; }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 20px; font-size: 11px; color: #999; border-top: 1px solid #e5e5e5; background: white; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Metro Medellín
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" href="index.html">Inicio</a>
+    <a class="nav-link" href="viewer.html">Resultados</a>
+    <a class="nav-link" href="https://github.com" target="_blank">Código</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Simulador de rutas</h1>
+  <p>Encuentra la ruta óptima entre dos estaciones del Metro de Medellín</p>
+  <div class="badges">
+    <span class="badge">Dijkstra — ruta más rápida</span>
+    <span class="badge">BFS — menos transbordos</span>
+    <span class="badge">Grafos ponderados</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- FORMULARIO -->
+  <div class="card">
+    <div class="card-title">Planea tu viaje</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Estación de origen</label>
+        <select id="origen">
+          <option value="">Selecciona una estación...</option>
+          <optgroup label="Línea A">
+            <option>Niquia</option><option>Bello</option><option>Madera</option>
+            <option>Acevedo</option><option>Tricentenario</option><option>Caribe</option>
+            <option>Universidad</option><option>Hospital</option><option>Prado</option>
+            <option>Parque Berrio</option><option>San Antonio</option><option>Alpujarra</option>
+            <option>Exposiciones</option><option>Industriales</option><option>Poblado</option>
+            <option>Aguacatala</option><option>Ayura</option><option>Envigado</option>
+            <option>Itagui</option><option>La Estrella</option>
+          </optgroup>
+          <optgroup label="Línea B">
+            <option>Suramericana</option><option>Estadio</option><option>Floresta</option>
+            <option>Santa Lucia</option><option>Trinidad</option><option>San Javier</option>
+          </optgroup>
+          <optgroup label="Línea K">
+            <option>Andalucia</option><option>Popular</option><option>Santo Domingo</option>
+          </optgroup>
+          <optgroup label="Línea J">
+            <option>Juan XXIII</option><option>Vallejuelos</option>
+          </optgroup>
+          <optgroup label="Línea T-A">
+            <option>Cisneros</option><option>Oriente</option><option>Miraflores</option>
+            <option>Alejandro Echavarria</option><option>Bicentenario</option><option>Buenos Aires</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estación de destino</label>
+        <select id="destino">
+          <option value="">Selecciona una estación...</option>
+          <optgroup label="Línea A">
+            <option>Niquia</option><option>Bello</option><option>Madera</option>
+            <option>Acevedo</option><option>Tricentenario</option><option>Caribe</option>
+            <option>Universidad</option><option>Hospital</option><option>Prado</option>
+            <option>Parque Berrio</option><option>San Antonio</option><option>Alpujarra</option>
+            <option>Exposiciones</option><option>Industriales</option><option>Poblado</option>
+            <option>Aguacatala</option><option>Ayura</option><option>Envigado</option>
+            <option>Itagui</option><option>La Estrella</option>
+          </optgroup>
+          <optgroup label="Línea B">
+            <option>Suramericana</option><option>Estadio</option><option>Floresta</option>
+            <option>Santa Lucia</option><option>Trinidad</option><option>San Javier</option>
+          </optgroup>
+          <optgroup label="Línea K">
+            <option>Andalucia</option><option>Popular</option><option>Santo Domingo</option>
+          </optgroup>
+          <optgroup label="Línea J">
+            <option>Juan XXIII</option><option>Vallejuelos</option>
+          </optgroup>
+          <optgroup label="Línea T-A">
+            <option>Cisneros</option><option>Oriente</option><option>Miraflores</option>
+            <option>Alejandro Echavarria</option><option>Bicentenario</option><option>Buenos Aires</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-bottom:10px">Criterio de optimización</div>
+    <div class="toggle-row">
+      <div class="toggle selected" onclick="seleccionarCriterio(this,'rapida')">⚡ Ruta más rápida</div>
+      <div class="toggle" onclick="seleccionarCriterio(this,'transbordos')">🔄 Menos transbordos</div>
+      <div class="toggle" onclick="seleccionarCriterio(this,'comparar')">📊 Comparar ambas</div>
+    </div>
+
+    <button class="btn-primary" onclick="calcularRuta()">Calcular ruta →</button>
+  </div>
+
+  <!-- ESTADISTICAS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num">37</div><div class="stat-label">Estaciones</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Líneas</div></div>
+    <div class="stat"><div class="stat-num">4</div><div class="stat-label">Transbordos</div></div>
+  </div>
+
+  <!-- LINEAS -->
+  <div class="lineas-card">
+    <div class="card-title">Líneas del sistema</div>
+    <div class="lineas-grid">
+      <div class="linea-item">
+        <div class="linea-color" style="background:#00A651"></div>
+        <div class="linea-info"><div class="linea-name">Línea A</div><div class="linea-desc">Niquia — La Estrella</div></div>
+      </div>
+      <div class="linea-item">
+        <div class="linea-color" style="background:#F7941D"></div>
+        <div class="linea-info"><div class="linea-name">Línea B</div><div class="linea-desc">San Antonio — San Javier</div></div>
+      </div>
+      <div class="linea-item">
+        <div class="linea-color" style="background:#29ABE2"></div>
+        <div class="linea-info"><div class="linea-name">Línea K</div><div class="linea-desc">Acevedo — Santo Domingo</div></div>
+      </div>
+      <div class="linea-item">
+        <div class="linea-color" style="background:#EC008C"></div>
+        <div class="linea-info"><div class="linea-name">Línea J</div><div class="linea-desc">San Javier — Vallejuelos</div></div>
+      </div>
+      <div class="linea-item">
+        <div class="linea-color" style="background:#8B4513"></div>
+        <div class="linea-info"><div class="linea-name">Línea T-A</div><div class="linea-desc">Industriales — Buenos Aires</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGORITMOS -->
+  <div class="card">
+    <div class="card-title">Algoritmos implementados</div>
+    <div class="algo-grid">
+      <div class="algo-item">
+        <div class="algo-name">Dijkstra</div>
+        <div class="algo-desc">Calcula la ruta más rápida considerando tiempos de recorrido y costo de transbordo (3 min).</div>
+        <span class="algo-tag">O((V + E) log V)</span>
+      </div>
+      <div class="algo-item">
+        <div class="algo-name">BFS por líneas</div>
+        <div class="algo-desc">Encuentra la ruta con el menor número de cambios de línea ignorando los tiempos.</div>
+        <span class="algo-tag">O(V + E)</span>
+      </div>
+      <div class="algo-item">
+        <div class="algo-name">Cierre de estación</div>
+        <div class="algo-desc">Simula el cierre de un nodo y recalcula la ruta alternativa disponible.</div>
+        <span class="algo-tag">O((V + E) log V)</span>
+      </div>
+      <div class="algo-item">
+        <div class="algo-name">Verificación de conectividad</div>
+        <div class="algo-desc">Detecta si la red queda desconectada tras el cierre de una estación hub.</div>
+        <span class="algo-tag">O(V + E)</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Universidad Cooperativa de Colombia · Estructura de Datos 2026 · Docente: Diego León Arcila Herrera</footer>
+
+<script>
+  let criterio = 'rapida';
+
+  function seleccionarCriterio(el, valor) {
+    document.querySelectorAll('.toggle').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    criterio = valor;
+  }
+
+  function calcularRuta() {
+    const origen = document.getElementById('origen').value;
+    const destino = document.getElementById('destino').value;
+    if (!origen || !destino) {
+      alert('Por favor selecciona estación de origen y destino.');
+      return;
+    }
+    if (origen === destino) {
+      alert('El origen y el destino deben ser estaciones diferentes.');
+      return;
+    }
+    window.location.href = `viewer.html?origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}&criterio=${criterio}`;
+  }
+</script>
+
+</body>
+</html>
