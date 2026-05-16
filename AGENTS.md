@@ -1,46 +1,56 @@
-# AGENTS.md - Registro de uso de IA
+# AGENTS.md - Registro de Agentes de IA
 
-## Herramienta utilizada
-- Claude (Anthropic) via claude.ai
+## Proyecto: Simulador de Metro de Medellin
+## Estudiante: Angel Andres Reina
+## Materia: Estructura de Datos - Actividad 13
+## Universidad: Universidad Cooperativa de Colombia - 2026
 
-## Etapas y decisiones
+---
 
-### Etapa 1 - Definicion del problema
-- El estudiante escribio el problema con sus propias palabras
-- La IA reformulo el problema manteniendo la intencion original
+## Agente 1: Claude (Anthropic)
 
-### Etapa 2 - Justificacion de la estructura de datos
-- La IA justifico el uso de grafo ponderado no dirigido
-- Se decidio usar lista de adyacencia con tuplas (tiempo, linea)
-- Se descartaron arboles y listas por no modelar conexiones multiples
+**Rol:** Agente de refinamiento y documentacion
 
-### Etapa 3 - Implementacion de grafo.py
-- La IA genero la clase Grafo con todos sus metodos
-- El estudiante valido la estructura de estaciones y transbordos
+**Funcionalidades:**
+- Reformular el problema del estudiante con mayor claridad y precision
+- Justificar la eleccion de la estructura de datos
+- Redactar el documento de analisis (secciones 4.1 a 4.6)
+- Generar el historial de prompts organizado por etapas
+- Redactar el README.md con instrucciones del proyecto
 
-### Etapa 4 - Implementacion de dijkstra.py
-- La IA implemento Dijkstra con heapq para optimizar rendimiento
-- Se agrego costo adicional de 3 min por transbordo de linea
+---
 
-### Etapa 5 - Implementacion de bfs.py
-- La IA implemento BFS rastreando estado (estacion, linea)
-- Permite encontrar ruta con minimo numero de cambios de linea
+## Agente 2: Claude Code (Anthropic)
 
-### Etapa 6 - Implementacion de simulador.py
-- La IA genero el menu principal integrando todos los modulos
-- Incluye simulacion de cierre de estacion y ruta alternativa
+**Rol:** Agente de implementacion de codigo
 
-### Etapa 7 - Implementacion de visualizacion.py
-- La IA genero el mapa PNG con backend Agg para Codespaces
-- Cada linea tiene su color y las rutas se resaltan en amarillo
+**Funcionalidades:**
+- Generar la clase Grafo con el modelo real del Metro de Medellin
+- Implementar el algoritmo Dijkstra con costo de transbordo
+- Implementar BFS para minimizar cambios de linea
+- Crear el simulador con menu interactivo de 7 opciones
+- Generar el mapa visual PNG con matplotlib
 
-### Etapa 8 - Pruebas
-- La IA genero tests de verificacion cruzada entre Dijkstra y BFS
-- El estudiante ejecuto y valido cada prueba
+---
 
-## Decisiones clave tomadas con apoyo de la IA
-1. Modelar transbordo como costo adicional en arista (no como nodo extra)
-2. Usar heapq para optimizar Dijkstra a O((V+E) log V)
-3. Usar backend Agg en matplotlib para compatibilidad con Codespaces
-4. Guardar estado (estacion, linea) en BFS para detectar cambios de linea
-5. Commits por etapa para evidenciar el progreso del desarrollo
+## Agente 3: Claude (Anthropic) - Modulo de pruebas
+
+**Rol:** Agente de verificacion y calidad
+
+**Funcionalidades:**
+- Generar casos de prueba automatizados con assert
+- Verificar conectividad de la red tras cierre de estaciones
+- Validar que Dijkstra y BFS producen resultados consistentes
+- Detectar y documentar errores reales durante el desarrollo
+
+---
+
+## Agente 4: Claude (Anthropic) - Modulo de interfaz
+
+**Rol:** Agente de desarrollo frontend
+
+**Funcionalidades:**
+- Generar index.html con formulario de seleccion de estaciones
+- Generar viewer.html con resultados en 5 tabs interactivos
+- Reimplementar Dijkstra y BFS en JavaScript para el navegador
+- Disenar la interfaz visual minimalista con colores por linea
