@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metro Medellín — Resultado</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { background: #f5f5f5; color: #1a1a1a; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: white; border-bottom: 1px solid #e5e5e5; }
+    .logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; }
+    .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #00A651; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-link { font-size: 13px; color: #888; text-decoration: none; cursor: pointer; }
+    .nav-link.active { color: #1a1a1a; font-weight: 500; }
+    .main { max-width: 860px; margin: 0 auto; padding: 24px; }
+    .breadcrumb { font-size: 13px; color: #999; margin-bottom: 20px; }
+    .breadcrumb a { color: #00A651; text-decoration: none; }
+    .breadcrumb span { margin: 0 6px; }
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .stat { background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 14px; text-align: center; }
+    .stat-num { font-size: 24px; font-weight: 500; color: #1a1a1a; }
+    .stat-label { font-size: 11px; color: #999; margin-top: 2px; }
+    .card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 14px; }
+    .card-title { font-size: 11px; font-weight: 500; color: #999; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 16px; }
+    .tabs { display: flex; gap: 0; margin-bottom: 14px; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; background: #fafafa; }
+    .tab { flex: 1; padding: 9px; text-align: center; font-size: 12px; color: #888; cursor: pointer; transition: all .15s; }
+    .tab.active { background: white; color: #1a1a1a; font-weight: 500; border-bottom: 2px solid #00A651; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .route { position: relative; padding-left: 24px; }
+    .route-line { position: absolute; left: 8px; top: 10px; bottom: 10px; width: 2px; background: #e5e5e5; }
+    .stop { display: flex; align-items: center; gap: 10px; padding: 7px 0; position: relative; }
+    .dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #00A651; background: white; position: absolute; left: -24px; z-index: 1; flex-shrink: 0; }
+    .dot.transbordo { background: #F7941D; border-color: #F7941D; }
+    .dot.inicio { background: #00A651; }
+    .dot.fin { background: #1a1a1a; border-color: #1a1a1a; }
+    .stop-name { font-size: 13px; color: #1a1a1a; }
+    .stop-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #fff4e6; color: #F7941D; border: 1px solid #fdd5a0; margin-left: 6px; }
+    .stop-tag.cerrada { background: #fef0f0; color: #e74c3c; border-color: #f5b8b8; }
+    .linea-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; color: white; margin-left: auto; flex-shrink: 0; }
+    .tiempo-tag { font-size: 10px; color: #999; margin-left: 4px; }
+    .comparar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .comparar-card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 14px; }
+    .comparar-card h3 { font-size: 12px; font-weight: 500; color: #1a1a1a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e5e5e5; }
+    .comparar-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+    .comparar-stat span:first-child { color: #666; }
+    .comparar-stat span:last-child { font-weight: 500; color: #1a1a1a; }
+    .mejor { border-color: #00A651; }
+    .mejor h3 { color: #00A651; }
+    .mejor-badge { font-size: 10px; background: #f0faf4; color: #00A651; border: 1px solid #c3e8d0; padding: 2px 8px; border-radius: 10px; float: right; }
+    .cierre-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 14px; }
+    .cierre-form select { padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; background: #fafafa; }
+    .cierre-form button { padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .cierre-resultado { background: #fef0f0; border: 1px solid #f5b8b8; border-radius: 8px; padding: 12px; font-size: 13px; color: #c0392b; display: none; }
+    .cierre-resultado.visible { display: block; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .btn { padding: 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; text-align: center; cursor: pointer; color: #666; background: white; text-decoration: none; display: block; transition: all .15s; }
+    .btn:hover { border-color: #ccc; }
+    .btn.primary { background: #00A651; color: white; border-color: #00A651; }
+    .btn.primary:hover { background: #008f44; }
+    .hub-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+    .hub-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 12px; }
+    .hub-name { font-weight: 500; color: #1a1a1a; }
+    .hub-grado { font-size: 11px; color: #999; }
+    .hub-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #fff4e6; color: #F7941D; border: 1px solid #fdd5a0; }
+    .conectividad { padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 500; text-align: center; }
+    .conectividad.ok { background: #f0faf4; color: #00A651; border: 1px solid #c3e8d0; }
+    .conectividad.error { background: #fef0f0; color: #e74c3c; border: 1px solid #f5b8b8; }
+    footer { text-align: center; padding: 20px; font-size: 11px; color: #999; border-top: 1px solid #e5e5e5; background: white; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Metro Medellín
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link active" href="viewer.html">Resultados</a>
+    <a class="nav-link" href="https://github.com" target="_blank">Código</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="breadcrumb">
+    <a href="index.html">Inicio</a>
+    <span>›</span>
+    <span id="breadcrumb-texto">Calculando ruta...</span>
+  </div>
+
+  <div class="summary">
+    <div class="stat"><div class="stat-num" id="stat-tiempo">--</div><div class="stat-label">minutos</div></div>
+    <div class="stat"><div class="stat-num" id="stat-paradas">--</div><div class="stat-label">paradas</div></div>
+    <div class="stat"><div class="stat-num" id="stat-transbordos">--</div><div class="stat-label">transbordos</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="cambiarTab(0)">Ruta más rápida</div>
+    <div class="tab" onclick="cambiarTab(1)">Menos transbordos</div>
+    <div class="tab" onclick="cambiarTab(2)">Comparar</div>
+    <div class="tab" onclick="cambiarTab(3)">Estaciones hub</div>
+    <div class="tab" onclick="cambiarTab(4)">Cierre de estación</div>
+  </div>
+
+  <!-- TAB 0: RUTA RAPIDA -->
+  <div class="tab-content active" id="tab-0">
+    <div class="card">
+      <div class="card-title">Itinerario — ruta más rápida (Dijkstra)</div>
+      <div class="route" id="ruta-rapida-container">
+        <div class="route-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: MENOS TRANSBORDOS -->
+  <div class="tab-content" id="tab-1">
+    <div class="card">
+      <div class="card-title">Itinerario — menos transbordos (BFS)</div>
+      <div class="route" id="ruta-bfs-container">
+        <div class="route-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: COMPARAR -->
+  <div class="tab-content" id="tab-2">
+    <div class="card">
+      <div class="card-title">Comparación de rutas</div>
+      <div class="comparar-grid" id="comparar-container"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: HUBS -->
+  <div class="tab-content" id="tab-3">
+    <div class="card">
+      <div class="card-title">Estaciones hub — mayor número de conexiones</div>
+      <div class="hub-list" id="hub-container"></div>
+      <div style="margin-top:14px">
+        <div class="card-title">Conectividad de la red</div>
+        <div class="conectividad ok" id="conectividad-status">Red completamente conectada ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: CIERRE -->
+  <div class="tab-content" id="tab-4">
+    <div class="card">
+      <div class="card-title">Simular cierre de estación</div>
+      <div class="cierre-form">
+        <select id="estacion-cerrar">
+          <option value="">Selecciona estación a cerrar...</option>
+        </select>
+        <button onclick="simularCierre()">Cerrar estación</button>
+      </div>
+      <div class="cierre-resultado" id="cierre-resultado"></div>
+      <div class="route" id="ruta-alternativa-container" style="margin-top:14px">
+        <div class="route-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <a class="btn" href="index.html">← Nueva búsqueda</a>
+    <a class="btn primary" href="index.html">Planear otro viaje</a>
+  </div>
+</div>
+
+<footer>Universidad Cooperativa de Colombia · Estructura de Datos 2026 · Docente: Diego León Arcila Herrera</footer>
+
+<script>
+// ============================================================
+// GRAFO DEL METRO DE MEDELLIN (replica de grafo.py en JS)
+// ============================================================
+const COSTO_TRANSBORDO = 3;
+
+const COLORES_LINEA = {
+  'A': '#00A651', 'B': '#F7941D', 'K': '#29ABE2', 'J': '#EC008C', 'T-A': '#8B4513'
+};
+
+const TRANSBORDOS = new Set(['San Antonio', 'Acevedo', 'Industriales', 'San Javier']);
+
+function construirMetro() {
+  const g = { estaciones: {}, lineas: {} };
+
+  function agregarEstacion(nombre, linea) {
+    if (!g.estaciones[nombre]) g.estaciones[nombre] = {};
+    if (!g.lineas[linea]) g.lineas[linea] = [];
+    if (!g.lineas[linea].includes(nombre)) g.lineas[linea].push(nombre);
+  }
+
+  function agregarConexion(origen, destino, tiempo, linea) {
+    g.estaciones[origen][destino] = { tiempo, linea };
+    g.estaciones[destino][origen] = { tiempo, linea };
+  }
+
+  const lineaA = ['Niquia','Bello','Madera','Acevedo','Tricentenario','Caribe','Universidad','Hospital','Prado','Parque Berrio','San Antonio','Alpujarra','Exposiciones','Industriales','Poblado','Aguacatala','Ayura','Envigado','Itagui','La Estrella'];
+  const tiemposA = [2,2,3,2,2,2,2,2,2,1,2,2,2,3,3,2,2,2,3];
+  lineaA.forEach(e => agregarEstacion(e, 'A'));
+  lineaA.forEach((e, i) => { if (i < lineaA.length-1) agregarConexion(e, lineaA[i+1], tiemposA[i], 'A'); });
+
+  const lineaB = ['San Antonio','Suramericana','Estadio','Floresta','Santa Lucia','Trinidad','San Javier'];
+  const tiemposB = [2,2,2,2,2,3];
+  lineaB.forEach(e => agregarEstacion(e, 'B'));
+  lineaB.forEach((e, i) => { if (i < lineaB.length-1) agregarConexion(e, lineaB[i+1], tiemposB[i], 'B'); });
+
+  const lineaK = ['Acevedo','Andalucia','Popular','Santo Domingo'];
+  const tiemposK = [4,4,4];
+  lineaK.forEach(e => agregarEstacion(e, 'K'));
+  lineaK.forEach((e, i) => { if (i < lineaK.length-1) agregarConexion(e, lineaK[i+1], tiemposK[i], 'K'); });
+
+  const lineaJ = ['San Javier','Juan XXIII','Vallejuelos'];
+  const tiemposJ = [5,5];
+  lineaJ.forEach(e => agregarEstacion(e, 'J'));
+  lineaJ.forEach((e, i) => { if (i < lineaJ.length-1) agregarConexion(e, lineaJ[i+1], tiemposJ[i], 'J'); });
+
+  const lineaTA = ['Industriales','Cisneros','Oriente','Miraflores','Alejandro Echavarria','Bicentenario','Buenos Aires'];
+  const tiemposTA = [3,3,3,3,3,3];
+  lineaTA.forEach(e => agregarEstacion(e, 'T-A'));
+  lineaTA.forEach((e, i) => { if (i < lineaTA.length-1) agregarConexion(e, lineaTA[i+1], tiemposTA[i], 'T-A'); });
+
+  return g;
+}
+
+// ============================================================
+// DIJKSTRA EN JAVASCRIPT
+// ============================================================
+function dijkstra(grafo, origen, destino, excluir = null) {
+  const est = grafo.estaciones;
+  if (!est[origen] || !est[destino]) return null;
+
+  const dist = {};
+  const prev = {};
+  const lineaLlegada = {};
+  Object.keys(est).forEach(e => { dist[e] = Infinity; prev[e] = null; lineaLlegada[e] = null; });
+  dist[origen] = 0;
+
+  const visitados = new Set();
+  const cola = [[0, origen, null]];
+
+  while (cola.length > 0) {
+    cola.sort((a, b) => a[0] - b[0]);
+    const [tiempoActual, estacion, lineaActual] = cola.shift();
+    if (visitados.has(estacion)) continue;
+    visitados.add(estacion);
+    if (estacion === destino) break;
+
+    for (const [vecino, datos] of Object.entries(est[estacion] || {})) {
+      if (vecino === excluir) continue;
+      let costoExtra = 0;
+      if (lineaActual && datos.linea !== lineaActual && TRANSBORDOS.has(estacion)) {
+        costoExtra = COSTO_TRANSBORDO;
+      }
+      const nuevo = tiempoActual + datos.tiempo + costoExtra;
+      if (nuevo < dist[vecino]) {
+        dist[vecino] = nuevo;
+        prev[vecino] = estacion;
+        lineaLlegada[vecino] = datos.linea;
+        cola.push([nuevo, vecino, datos.linea]);
+      }
+    }
+  }
+
+  if (dist[destino] === Infinity) return null;
+
+  const ruta = [];
+  let actual = destino;
+  while (actual) { ruta.unshift(actual); actual = prev[actual]; }
+
+  const transbordos = [];
+  let lineaAnterior = null;
+  ruta.forEach((e, i) => {
+    if (i === 0) return;
+    const lt = lineaLlegada[e];
+    if (lineaAnterior && lt !== lineaAnterior) transbordos.push(ruta[i-1]);
+    lineaAnterior = lt;
+  });
+
+  return { tiempo: dist[destino], ruta, transbordos, lineaLlegada };
+}
+
+// ============================================================
+// BFS MENOS TRANSBORDOS EN JAVASCRIPT
+// ============================================================
+function bfsMenosTransbordos(grafo, origen, destino) {
+  const est = grafo.estaciones;
+  if (!est[origen] || !est[destino]) return null;
+
+  const cola = [{ estacion: origen, linea: null, transbordos: 0, ruta: [origen] }];
+  const visitados = {};
+  let mejor = null;
+
+  while (cola.length > 0) {
+    const { estacion, linea, transbordos, ruta } = cola.shift();
+    const estado = `${estacion}|${linea}`;
+    if (visitados[estado] !== undefined && visitados[estado] <= transbordos) continue;
+    visitados[estado] = transbordos;
+
+    if (estacion === destino) {
+      if (!mejor || transbordos < mejor.transbordos) mejor = { transbordos, ruta };
+      continue;
+    }
+
+    for (const [vecino, datos] of Object.entries(est[estacion] || {})) {
+      const nuevoT = transbordos + (linea && datos.linea !== linea ? 1 : 0);
+      cola.push({ estacion: vecino, linea: datos.linea, transbordos: nuevoT, ruta: [...ruta, vecino] });
+    }
+  }
+
+  return mejor;
+}
+
+// ============================================================
+// ESTACIONES HUB
+// ============================================================
+function calcularHubs(grafo) {
+  return Object.entries(grafo.estaciones)
+    .map(([e, v]) => ({ estacion: e, grado: Object.keys(v).length }))
+    .sort((a, b) => b.grado - a.grado);
+}
+
+// ============================================================
+// VERIFICAR CONECTIVIDAD
+// ============================================================
+function verificarConectividad(grafo) {
+  const est = grafo.estaciones;
+  const keys = Object.keys(est);
+  if (!keys.length) return true;
+  const visitados = new Set();
+  const cola = [keys[0]];
+  while (cola.length) {
+    const actual = cola.shift();
+    if (visitados.has(actual)) continue;
+    visitados.add(actual);
+    Object.keys(est[actual] || {}).forEach(v => { if (!visitados.has(v)) cola.push(v); });
+  }
+  return visitados.size === keys.length;
+}
+
+// ============================================================
+// RENDER DE RUTA
+// ============================================================
+function renderRuta(containerId, resultado, grafo) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '<div class="route-line"></div>';
+
+  if (!resultado) {
+    container.innerHTML += '<p style="color:#e74c3c;font-size:13px;padding:8px 0">No hay ruta disponible entre estas estaciones.</p>';
+    return;
+  }
+
+  const { ruta, transbordos, lineaLlegada } = resultado;
+
+  ruta.forEach((estacion, i) => {
+    const esTransbordo = transbordos && transbordos.includes(estacion);
+    const esInicio = i === 0;
+    const esFin = i === ruta.length - 1;
+    const linea = lineaLlegada ? lineaLlegada[estacion] : null;
+    const color = linea ? COLORES_LINEA[linea] : '#ccc';
+
+    const dotClass = esInicio ? 'dot inicio' : esFin ? 'dot fin' : esTransbordo ? 'dot transbordo' : 'dot';
+
+    let html = `<div class="stop">
+      <div class="${dotClass}"></div>
+      <span class="stop-name">${estacion}</span>`;
+
+    if (esTransbordo) html += `<span class="stop-tag">transbordo</span>`;
+    if (linea) html += `<span class="linea-tag" style="background:${color}">Línea ${linea}</span>`;
+
+    html += `</div>`;
+    container.innerHTML += html;
+  });
+}
+
+// ============================================================
+// RENDER COMPARAR
+// ============================================================
+function renderComparar(rapida, bfs) {
+  const container = document.getElementById('comparar-container');
+  const tiempoBfs = bfs ? (bfs.ruta.length - 1) * 2 : '--';
+
+  container.innerHTML = `
+    <div class="comparar-card mejor">
+      <h3>⚡ Ruta más rápida <span class="mejor-badge">Dijkstra</span></h3>
+      <div class="comparar-stat"><span>Tiempo total</span><span>${rapida ? rapida.tiempo + ' min' : '--'}</span></div>
+      <div class="comparar-stat"><span>Paradas</span><span>${rapida ? rapida.ruta.length - 1 : '--'}</span></div>
+      <div class="comparar-stat"><span>Transbordos</span><span>${rapida ? rapida.transbordos.length : '--'}</span></div>
+    </div>
+    <div class="comparar-card">
+      <h3>🔄 Menos transbordos <span class="mejor-badge" style="background:#fff4e6;color:#F7941D;border-color:#fdd5a0">BFS</span></h3>
+      <div class="comparar-stat"><span>Transbordos</span><span>${bfs ? bfs.transbordos : '--'}</span></div>
+      <div class="comparar-stat"><span>Paradas</span><span>${bfs ? bfs.ruta.length - 1 : '--'}</span></div>
+      <div class="comparar-stat"><span>Estaciones</span><span>${bfs ? bfs.ruta.length : '--'}</span></div>
+    </div>`;
+}
+
+// ============================================================
+// RENDER HUBS
+// ============================================================
+function renderHubs(grafo) {
+  const hubs = calcularHubs(grafo).slice(0, 8);
+  const container = document.getElementById('hub-container');
+  container.innerHTML = hubs.map(({ estacion, grado }) => {
+    const esTransbordo = TRANSBORDOS.has(estacion);
+    return `<div class="hub-item">
+      <div><div class="hub-name">${estacion}</div><div class="hub-grado">${grado} conexiones</div></div>
+      ${esTransbordo ? '<span class="hub-badge">transbordo</span>' : ''}
+    </div>`;
+  }).join('');
+
+  const conectado = verificarConectividad(grafo);
+  document.getElementById('conectividad-status').textContent = conectado
+    ? 'Red completamente conectada ✓'
+    : 'ADVERTENCIA: Red desconectada ✗';
+  document.getElementById('conectividad-status').className = `conectividad ${conectado ? 'ok' : 'error'}`;
+}
+
+// ============================================================
+// CIERRE DE ESTACION
+// ============================================================
+function simularCierre() {
+  const estacion = document.getElementById('estacion-cerrar').value;
+  if (!estacion) return;
+
+  const grafoMod = construirMetro();
+  delete grafoMod.estaciones[estacion];
+  Object.values(grafoMod.estaciones).forEach(v => delete v[estacion]);
+
+  const params = new URLSearchParams(window.location.search);
+  const origen = params.get('origen');
+  const destino = params.get('destino');
+
+  const conectado = verificarConectividad(grafoMod);
+  const resultado = dijkstra(grafoMod, origen, destino);
+
+  const div = document.getElementById('cierre-resultado');
+  div.className = 'cierre-resultado visible';
+
+  if (!conectado) {
+    div.textContent = `⚠ La red quedó desconectada al cerrar "${estacion}". Era un punto de articulación.`;
+  } else if (!resultado) {
+    div.textContent = `⚠ No hay ruta alternativa entre ${origen} y ${destino} con "${estacion}" cerrada.`;
+  } else {
+    div.textContent = `Ruta alternativa encontrada: ${resultado.tiempo} min (sin ${estacion})`;
+    renderRuta('ruta-alternativa-container', resultado, grafoMod);
+  }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function cambiarTab(index) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
+  document.querySelectorAll('.tab-content').forEach((t, i) => t.classList.toggle('active', i === index));
+}
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const origen = params.get('origen') || 'Niquia';
+  const destino = params.get('destino') || 'Santo Domingo';
+  const criterio = params.get('criterio') || 'rapida';
+
+  document.getElementById('breadcrumb-texto').textContent = `${origen} → ${destino}`;
+
+  const grafo = construirMetro();
+  const rapida = dijkstra(grafo, origen, destino);
+  const bfs = bfsMenosTransbordos(grafo, origen, destino);
+
+  if (rapida) {
+    document.getElementById('stat-tiempo').textContent = rapida.tiempo;
+    document.getElementById('stat-paradas').textContent = rapida.ruta.length - 1;
+    document.getElementById('stat-transbordos').textContent = rapida.transbordos.length;
+  }
+
+  renderRuta('ruta-rapida-container', rapida, grafo);
+  const bfsResult = bfs ? { ruta: bfs.ruta, transbordos: [], lineaLlegada: {} } : null;
+  renderRuta('ruta-bfs-container', bfsResult, grafo);
+  renderComparar(rapida, bfs);
+  renderHubs(grafo);
+
+  // Poblar select de cierre
+  const selectCierre = document.getElementById('estacion-cerrar');
+  Object.keys(grafo.estaciones).sort().forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e;
+    opt.textContent = e + (TRANSBORDOS.has(e) ? ' (transbordo)' : '');
+    selectCierre.appendChild(opt);
+  });
+
+  if (criterio === 'transbordos') cambiarTab(1);
+  else if (criterio === 'comparar') cambiarTab(2);
+};
+</script>
+
+</body>
+</html>
